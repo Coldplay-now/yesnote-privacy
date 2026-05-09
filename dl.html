@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>下载爱记笔记</title>
+  <meta name="description" content="爱记笔记 iOS 下载入口（按系统自动跳转 App Store）">
+  <!-- iOS Safari 顶部「Open App / Download from App Store」横幅。 -->
+  <meta name="apple-itunes-app" content="app-id=6767819417">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #fbf6ea, #f8f1e4);
+      color: #23201c;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 26px;
+      margin: 0 0 14px;
+      letter-spacing: 0.02em;
+    }
+    p {
+      color: #686054;
+      line-height: 1.7;
+      margin: 8px 0;
+    }
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid #d9cdb8;
+      border-top-color: #c75728;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    a.button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      background: #c75728;
+      color: #fffdf8;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .small {
+      color: #8e8779;
+      font-size: 13px;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner" aria-hidden="true"></div>
+  <h1 id="title">正在跳转到下载页面…</h1>
+  <p id="hint">如果 1 秒内没有自动跳转：</p>
+  <a id="manual-link" class="button" href="https://apps.apple.com/cn/app/id6767819417">手动打开 App Store</a>
+  <p class="small">爱记笔记 · 本地优先，无需账号</p>
+
+  <script>
+    (function () {
+      // App Store 数字 ID（永久固定）
+      var APP_STORE_ID = '6767819417';
+
+      var ua = navigator.userAgent || '';
+      var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+
+      var target;
+      var label;
+      if (isIOS) {
+        target = 'https://apps.apple.com/cn/app/id' + APP_STORE_ID;
+        label = '正在跳转到 App Store…';
+      } else {
+        // 桌面 / Android：暂时只走 App Store 网页（同 ID）
+        target = 'https://apps.apple.com/cn/app/id' + APP_STORE_ID;
+        label = '爱记笔记目前仅 iOS 版，正在打开 App Store…';
+      }
+
+      document.getElementById('title').textContent = label;
+      document.getElementById('manual-link').href = target;
+
+      setTimeout(function () { window.location.replace(target); }, 250);
+    })();
+  </script>
+</body>
+</html>
