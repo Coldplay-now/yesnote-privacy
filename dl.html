@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>下载爱记笔记</title>
-  <meta name="description" content="爱记笔记 iOS 下载入口（按系统自动跳转 App Store）">
+  <meta name="description" content="爱记笔记下载入口：iOS → App Store；Android → APK 直链。">
   <!-- iOS Safari 顶部「Open App / Download from App Store」横幅。 -->
   <meta name="apple-itunes-app" content="app-id=6767819417">
   <style>
@@ -70,23 +70,33 @@
     (function () {
       // App Store 数字 ID（永久固定）
       var APP_STORE_ID = '6767819417';
+      // GitHub Releases 的「最新 APK」稳定直链：tag 升级时无需改 dl.html。
+      var ANDROID_APK_URL = 'https://github.com/Coldplay-now/yesnote-privacy/releases/latest/download/yesnote-android.apk';
 
       var ua = navigator.userAgent || '';
       var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      var isAndroid = /Android/i.test(ua);
 
       var target;
       var label;
+      var manualText = '手动打开 App Store';
       if (isIOS) {
         target = 'https://apps.apple.com/cn/app/id' + APP_STORE_ID;
         label = '正在跳转到 App Store…';
+      } else if (isAndroid) {
+        target = ANDROID_APK_URL;
+        label = '正在下载 APK…';
+        manualText = '手动下载 APK';
       } else {
-        // 桌面 / Android：暂时只走 App Store 网页（同 ID）
+        // 桌面浏览器：默认走 App Store 详情页
         target = 'https://apps.apple.com/cn/app/id' + APP_STORE_ID;
-        label = '爱记笔记目前仅 iOS 版，正在打开 App Store…';
+        label = '请使用 iPhone 或 Android 手机打开本页';
       }
 
       document.getElementById('title').textContent = label;
-      document.getElementById('manual-link').href = target;
+      var link = document.getElementById('manual-link');
+      link.href = target;
+      link.textContent = manualText;
 
       setTimeout(function () { window.location.replace(target); }, 250);
     })();
