@@ -244,19 +244,46 @@
 
   <script>
     (function () {
-      // 动态加载最新 Android Release：拉一次 /releases，挑第一条 tag 以 android- 开头、
-      // 非 prerelease / draft 的条目，刷新所有 [data-android-*] 元素。
+      // 动态加载最新 Android Release：拉 /releases，从 tag 以 android- 开头、非 prerelease / draft
+      // 的全部条目里挑版本号最大的，刷新所有 [data-android-*] 元素。
       // 离线 / 限流 / API 变更时静默回退到 latest/download 直链（已硬编码）。
-      var REPO_API = 'https://api.github.com/repos/Coldplay-now/yesnote-privacy/releases';
+      //
+      // ⚠️ GitHub /releases API 默认按 tag 字符串字典序排，不是按 published_at 时间。
+      // v1.9.0 字符 '9' > '1'，会被排到 v1.10.x 前面 —— 不能 .find() 取第一个匹配，
+      // 必须自己跑数字比较找版本号最大的。per_page=30 兜历史 release 增长，1.x 全系列约 25 个 tag。
+      var REPO_API = 'https://api.github.com/repos/Coldplay-now/yesnote-privacy/releases?per_page=30';
+
+      function parseAndroidVersion(tag) {
+        var m = /^android-v(\d+(?:\.\d+)*)/i.exec(tag);
+        return m ? m[1].split('.').map(function (x) { return parseInt(x, 10) || 0; }) : null;
+      }
+
+      function compareVersionArr(a, b) {
+        var n = Math.max(a.length, b.length);
+        for (var i = 0; i < n; i++) {
+          var x = a[i] || 0;
+          var y = b[i] || 0;
+          if (x !== y) return x - y;
+        }
+        return 0;
+      }
 
       fetch(REPO_API, { headers: { 'Accept': 'application/vnd.github+json' } })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (releases) {
           if (!Array.isArray(releases)) return;
-          var release = releases.find(function (r) {
-            return /^android-/i.test(r.tag_name) && !r.prerelease && !r.draft;
-          });
-          if (!release) return;
+          var candidate = releases
+            .filter(function (r) { return /^android-/i.test(r.tag_name) && !r.prerelease && !r.draft; })
+            .map(function (r) {
+              var v = parseAndroidVersion(r.tag_name);
+              return v ? { release: r, version: v } : null;
+            })
+            .filter(function (x) { return x !== null; })
+            .reduce(function (best, cur) {
+              return (!best || compareVersionArr(cur.version, best.version) > 0) ? cur : best;
+            }, null);
+          if (!candidate) return;
+          var release = candidate.release;
 
           var apk = release.assets.find(function (a) { return /\.apk$/i.test(a.name); });
           var zip = release.assets.find(function (a) { return /\.zip$/i.test(a.name); });
