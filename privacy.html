@@ -28,17 +28,18 @@
     p, li { color: #3d3530; }
     .meta { color: #686054; margin-bottom: 24px; }
     a { color: #c75728; }
+    code { background: rgba(199, 87, 40, 0.08); padding: 0 4px; border-radius: 3px; font-size: 0.92em; }
   </style>
 </head>
 <body>
   <main>
     <article>
       <h1>隐私政策</h1>
-      <p class="meta">最后更新：2026-05-09</p>
+      <p class="meta">最后更新：2026-05-23</p>
 
       <p>
-        爱记笔记（YES NOTE）是一款本地优先的笔记 App。我们极其在意你的隐私，
-        所以把它做得很简单。
+        爱记笔记（YES NOTE）是一款<strong>本地优先</strong>的笔记 App。我们极其在意你的隐私，所以做得很简单：
+        <strong>我们不运行任何服务器，看不到你的笔记内容，也不收集你的任何使用数据</strong>。
       </p>
 
       <h2>我们收集什么</h2>
@@ -46,30 +47,82 @@
         简单回答：<strong>不收集任何个人数据</strong>。
       </p>
       <ul>
-        <li>不要求注册账号，没有用户系统。</li>
-        <li>不上传你写下的任何笔记内容。所有笔记都只存在你设备的 UserDefaults 中。</li>
-        <li>不内置任何第三方分析、广告或追踪 SDK。</li>
-        <li>不读取通讯录、位置、麦克风等敏感权限。</li>
+        <li>不要求注册账号，没有用户系统，没有我们运营的后端。</li>
+        <li>不上传你写下的任何笔记内容到我们这里。</li>
+        <li>不内置任何第三方分析、广告、崩溃上报或追踪 SDK。所有 crash 信息由 Apple TestFlight / App Store Connect 与 Google Play 内部聚合，我们仅看到聚合后的去标识统计。</li>
+        <li>不读取通讯录、位置、麦克风、相册（除下方一项例外）等敏感权限。</li>
+      </ul>
+
+      <h2>笔记存在哪里</h2>
+      <ul>
+        <li>
+          <strong>iPhone / iPad / Mac</strong>：笔记保存在 Core Data SQLite 文件中，位于 App Group 容器
+          <code>group.com.yesnote.xt</code>。如果你登录了 iCloud 且 App 的 iCloud 同步开关打开，
+          数据会镜像到你 Apple ID 名下的私有 CloudKit 容器 <code>iCloud.com.yesnote.xt</code>。
+          <strong>这个容器是你的私有空间，Apple 不会让我们读到内容，我们也没有任何方式访问它</strong>。
+        </li>
+        <li>
+          <strong>Android</strong>：笔记保存在 Android Jetpack DataStore Preferences 中，
+          位于 App 沙盒里。Android 端目前不提供云同步。
+        </li>
+      </ul>
+
+      <h2>我们不调用任何 AI 服务</h2>
+      <p>
+        从 3.3 / 1.11 起，App 显式做了以下事情来保证笔记文本不离开你的设备：
+      </p>
+      <ul>
+        <li>
+          <strong>iOS / iPadOS / macOS</strong>：编辑器所有文本字段（标题 / 正文 / 标签）显式调用
+          <code>.writingToolsBehavior(.disabled)</code>，关闭 Apple Intelligence 写作工具。
+          这意味着<strong>笔记文本不会进入 Apple 的 Private Cloud Compute，也不会被发送到可选的 ChatGPT 集成</strong>。
+        </li>
+        <li>
+          <strong>Android</strong>：App 本身不调用 OpenAI / Gemini / Claude 或任何其它远端 AI 服务。
+          系统输入法的本地建议（Gboard 等）由系统控制，本 App 不读取也不上传任何键盘事件。
+        </li>
       </ul>
 
       <h2>权限使用</h2>
       <ul>
         <li>
-          <strong>NSPhotoLibraryAddUsageDescription</strong>：当你点击「保存到相册」时，
+          <strong>iCloud 容器（iOS / iPadOS / macOS）</strong>：用于跨设备同步同一 Apple ID 下的笔记。
+          完全可选；在系统设置 → Apple ID → iCloud 中可以单独关闭。
+        </li>
+        <li>
+          <strong>相册写入（仅 iOS）</strong>：当你点击「保存到相册」时，
           仅将 App 内生成的分享卡片图片写入你自己的照片库。我们不读取你已有的任何照片。
+        </li>
+        <li>
+          <strong>文件读写</strong>：用于导出 Markdown / JSON 备份、导入 .txt / .md 文本文件、
+          以及拖入 / 拖出 笔记（macOS Finder 双向拖拽）。所有读写都通过系统文件选择器，由你授权。
         </li>
       </ul>
 
       <h2>数据迁移与删除</h2>
+      <ul>
+        <li>
+          <strong>导出</strong>：设置 → 数据 → 导出笔记，支持 Markdown（可读）或 JSON（完整备份）两种格式。
+        </li>
+        <li>
+          <strong>删除本地数据</strong>：卸载 App 即完全清除本机所有笔记 + 所有偏好设置。
+        </li>
+        <li>
+          <strong>删除 iCloud 数据</strong>：在系统设置 → Apple ID → iCloud → 管理账户存储 →
+          爱记笔记 → 删除数据，可单独清空云端容器；不影响其它设备的本地副本（直到那些设备也同步一次）。
+        </li>
+      </ul>
+
+      <h2>政策变更</h2>
       <p>
-        所有笔记保存在 App 的 UserDefaults 中。卸载 App 即等同于完全删除所有数据。
-        当前版本不提供云同步，也没有备份服务器；如果你需要把笔记带走，
-        建议直接复制粘贴到其他笔记 App（后续版本可能会加导出功能）。
+        如果未来这份政策有变化，会在 App 的「设置 → 隐私 → 查看完整隐私政策」入口以及本页顶部
+        「最后更新」时间体现。涉及实质变化的会在 App 内通过更新弹窗或 release notes 主动告知。
       </p>
 
       <h2>联系我们</h2>
       <p>
         有问题或建议，请发邮件到 <a href="mailto:okok.galagala@gmail.com">okok.galagala@gmail.com</a>。
+        也欢迎在 GitHub <a href="https://github.com/Coldplay-now/yesnote-privacy/issues">提 issue</a>。
       </p>
     </article>
   </main>
